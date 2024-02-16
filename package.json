@@ -1,0 +1,20 @@
+{
+  "name": "wave",
+  "version": "1.0.0",
+  "description": "A pure-js frontend framework",
+  "author": "flowxrc",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/bundler.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flowxrc/wave"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "fs-jetpack": "^5.1.0",
+    "typescript": "^5.3.3"
+  }
+}

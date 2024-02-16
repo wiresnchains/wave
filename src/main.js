@@ -1,0 +1,1 @@
+require("./classes/App.js");
