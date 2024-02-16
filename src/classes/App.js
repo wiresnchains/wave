@@ -1,156 +1,137 @@
-import Helpers from "../Helpers.js";
-import WaveDataListener from "./DataListener.js";
+import AppStore from "./AppStore";
+import DataListener from "./DataListener";
+import store from "../store";
+
+function getElement(query) {
+    const firstChar = query.charAt(0);
+    const type = firstChar == "#" ? "id" : firstChar == "." ? "class" : null;
+
+    if (!type) {
+        console.error(`[Wave/App] Could not resolve element type: ${query}`);
+        return;
+    }
+
+    let element = type == "class" ? document.getElementsByClassName(query.slice(1))[0] : document.getElementById(query.slice(1));
+
+    if (!element) {
+        console.error(`Element not found: Name: "${query}", type: "${type}"`);
+        return;
+    }
+    
+    return element;
+};
 
 class WaveApp {
-    constructor(mountId, data = {}, methods = {}, dataRefrestRate = 100) {
-        this.mount = Helpers.GetElement(mountId);
-        this.data = data;
-        this.methods = methods;
-        this.dataRefrestRate = dataRefrestRate;
+    constructor(mountId, store, dataRefreshRate) {
+        this.mountId = mountId;
+        this.store = store || new AppStore();
+        this.dataRefreshRate = dataRefreshRate;
 
-        this.hook();
+        this.mount();
     };
 
-    hook() {
+    mount() {
+        this.mount = getElement(this.mountId);
+
         if (!this.checkMount())
             return;
 
-        this.initVariables();
-        this.parseVariables();
+        console.log("[Wave/App] Mounted");
+
+        this.initStore();
+        this.updateConditionals();
+        this.updateEvents();
     };
 
-    initVariables() {
-        const keys = Object.keys(this.data);
-
-        for (let i = 0; i < keys.length; i++)
-            new WaveDataListener(this.data, keys[i], this, this.dataRefrestRate);
-    };
-
-    parseVariables() {
-        if (!this.checkMount())
-            return;
-
-        const elements = this.mount.getElementsByTagName("*");
-
-        for (let i = 0; i < elements.length; i++) {
-            const element = elements[i];
-
-            if (!element.innerHTML.includes("{{ ") || !element.innerHTML.includes(" }}"))
-                continue;
-
-            element.innerHTML = element.innerHTML.replaceAll("{{ ", "<span>").replaceAll(" }}", "</span>");
-
-            const subElements = element.getElementsByTagName("span");
-
-            for (let i = 0; i < subElements.length; i++) {
-                const subElement = subElements[i];
-                subElement.setAttribute("wave-data", subElement.innerHTML);
-
-                if (this.data[subElement.innerHTML] == undefined) {
-                    this.data[subElement.innerHTML] = null;
-                    new WaveDataListener(this.data, subElement.innerHTML, this, this.dataRefrestRate);
-                }
-
-                subElement.innerHTML = this.data[subElement.innerHTML];
-            }
-        }
-
-        this.dataChanged();
-    };
-
-    dataChanged() {
-        if (!this.checkMount())
-            return;
-
-        const keys = Object.keys(this.data);
-
+    initStore() {
+        const keys = Object.keys(this.store.data);
+        
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
-            const value = this.data[key];
+            const value = this.store.data[key];
 
-            const elements = this.mount.querySelectorAll(`[wave-data="${key}"]`);
+            const elements = this.mount.getElementsByTagName("*");
 
-            for (let i = 0; i < elements.length; i++)
-                elements[i].innerHTML = value;
+            new DataListener(this.store.data, key, this, this.dataRefreshRate);
+
+            for (let j = 0; j < elements.length; j++) {
+                const element = elements[j];
+
+                if (!element.innerHTML.includes(`{{ ${key} }}`))
+                    continue;
+
+                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span wave-data="${key}">${value}</span>`);
+            }
         }
-
-        this.parseAttributes();
     };
 
-    parseAttributes() {
-        if (!this.checkMount())
-            return;
-
-        this.hookConditionals();
-        this.hookEvents();
-    };
-
-    hookConditionals() {
+    updateConditionals() {
         const elements = this.mount.querySelectorAll("[wave-condition]");
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
             const attribute = element.getAttribute("wave-condition");
 
-            const operatorType = Helpers.GetLogicalOperatorType(attribute);
+            for (let j = 0; j < store.logicalOperators.length; j++) {
+                const logicalOperator = store.logicalOperators[j];
+                
+                if (!attribute.includes(logicalOperator.attributeString))
+                    continue;
 
-            let condition = false;
+                const split = attribute.split(logicalOperator.attributeString);
 
-            switch (operatorType) {
-                case Helpers.LogicalOperators.Equals: {
-                    const split = attribute.split(" = ")
-                    condition = this.data[split[0]] == split[1];
-                    break;
-                }
-                case Helpers.LogicalOperators.MoreThan: {
-                    const split = attribute.split(" > ")
-                    condition = this.data[split[0]] > Number(split[1]);
-                    break;
-                }
-                case Helpers.LogicalOperators.MoreThanOrEqual: {
-                    const split = attribute.split(" >= ")
-                    condition = this.data[split[0]] >= Number(split[1]);
-                    break;
-                }
-                case Helpers.LogicalOperators.LessThan: {
-                    const split = attribute.split(" < ")
-                    condition = this.data[split[0]] < Number(split[1]);
-                    break;
-                }
-                case Helpers.LogicalOperators.LessThanOrEqual: {
-                    const split = attribute.split(" <= ")
-                    condition = this.data[split[0]] <= Number(split[1]);
-                    break;
-                }
+                element.style.display = logicalOperator.handler(this.store.data[split[0]], split[1]) ? "" : "none";
             }
-
-            element.style.display = condition ? "" : "none";
         }
     };
 
-    hookEvents() {
-        this.hookClickEvent();
-    };
-
-    hookClickEvent() {
-        const elements = this.mount.querySelectorAll("[wave-click]");
+    updateEvents() {
+        const elements = this.mount.querySelectorAll("*");
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
-            const attribute = element.getAttribute("wave-click");
 
-            element.onclick = this.methods[attribute];
+            for (let j = 0; j < store.events.length; j++) {
+                const event = store.events[j];
+                const attribute = element.getAttribute(`wave-event:${event.name}`);
+
+                if (attribute == undefined)
+                    continue;
+
+                const split = attribute.split("(");
+                const method = split[0];
+                const args = split[1].replace(")", "").split(", ");
+
+                event.handler(element, this.store.methods[method], ...args);
+            }
         }
+    };
+
+    dataChanged() {
+        const keys = Object.keys(this.store.data);
+        
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const value = this.store.data[key];
+
+            const elements = this.mount.querySelectorAll(`[wave-data="${key}"]`);
+
+            for (let j = 0; j < elements.length; j++)
+                elements[j].innerHTML = value;
+        }
+
+        this.updateConditionals();
+        this.updateEvents();
     };
 
     checkMount() {
         if (!this.mount) {
-            console.error("App not mounted");
+            console.error(`[Wave/App] Failed to mount app`);
             return false;
         }
 
         return true;
-    };
+    }
 };
 
 export default WaveApp;

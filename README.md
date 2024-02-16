@@ -11,24 +11,25 @@ A pure-js framework for frontend development
     </head>
     <body>
         <div id="app">
-            <h1>{{ message }}</h1>
-            <h1 wave-condition="message = Hello, world">{{ secretMessage }}</h1>
-            <h1 wave-condition="count > 10">more than 10</h1>
-            <h1 wave-condition="count < 10">less than 10</h1>
-            <h1>Count: {{ count }}</h1>
-            <button wave-click="increment">Increment</button>
+            <h1>You have clicked the button {{ count }} times.</h1>
+            <h4 wave-condition="count >= 10">You have clicked the button over 10 times!</h4>
+            <button wave-event:click="increment()">Click</button>
         </div>
         <script src="wave.js" type="text/javascript"></script>
         <script type="text/javascript">
-            const exampleApp = new WaveApp("#app", {
-                message: "Hello, world!",
-                secretMessage: "My secret message :)",
-                count: 5
-            }, {
-                increment: () => {
-                    exampleApp.data.count += 1;
+            // Interval between updating DOM variables in milliseconds
+            const dataRefreshRate = 100;
+
+            const exampleApp = new WaveApp("#app", new WaveAppStore({
+                data: {
+                    count: 5
+                },
+                methods: {
+                    increment: () => {
+                        exampleApp.store.data.count += 1;
+                    }
                 }
-            });
+            }), dataRefreshRate);
         </script>
     </body>
 </html>
@@ -40,3 +41,9 @@ A pure-js framework for frontend development
 - `>=` More than or equal to
 - `<` Less than
 - `<=` Less than or equal to
+
+### Events
+How to use? Add an `wave-event:type="method()"` attribute to your element. Available event types are listed below.
+- `click` Triggers on mouse click
+- `input` Triggers when an element recieves input
+- `change` Triggers on element's value change

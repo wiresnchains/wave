@@ -1,6 +1,6 @@
 {
   "name": "wave",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A pure-js frontend framework",
   "author": "flowxrc",
   "license": "ISC",
@@ -14,7 +14,6 @@
   },
   "devDependencies": {
     "esbuild": "^0.20.0",
-    "fs-jetpack": "^5.1.0",
-    "typescript": "^5.3.3"
+    "fs-jetpack": "^5.1.0"
   }
 }
