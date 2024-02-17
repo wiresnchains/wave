@@ -1,5 +1,5 @@
 ## 🌊 Wave.js
-A pure-js framework for frontend development
+A pure-js lightweight framework for frontend development.
 
 ### Usage
-Please check out our new [wiki page](https://github.com/flowxrc/wave/wiki) for all of the latest documentation with examples
+Please check out our new [wiki page](https://github.com/flowxrc/wave/wiki) for the latest documentation with examples

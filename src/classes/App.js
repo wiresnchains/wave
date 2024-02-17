@@ -1,17 +1,17 @@
-import AppStore from "./AppStore";
-import DataListener from "./DataListener";
-import Utils from "../extra/Utils";
-import store from "../store";
+import WaveStore from "./Store";
+import WaveDataListener from "./DataListener";
+import WaveUtils from "../extra/Utils";
+import _store from "../_store";
 
 class WaveApp {
     constructor(dataRefreshRate = 100) {
         this.dataRefreshRate = dataRefreshRate;
-        this.store = new AppStore();
+        this.store = new WaveStore();
     };
 
-    useStore(store = new AppStore()) {
-        if (!store.constructor || store.constructor.name != "WaveAppStore") {
-            console.error("[Wave/App] Store is not a `WaveAppStore`");
+    useStore(store = new WaveStore()) {
+        if (!store.constructor || store.constructor.name != "WaveStore") {
+            console.error("[WaveApp] Store is not a `WaveStore`");
             return;
         }
 
@@ -20,14 +20,14 @@ class WaveApp {
 
     mount(elementQuery) {
         if (!this.store) {
-            console.error("[Wave/App] Store not found, failed to mount app");
+            console.error("[WaveApp] Store not found, failed to mount app");
             return;
         }
 
-        this.mount = Utils.GetElement(elementQuery);
+        this.mount = WaveUtils.GetElement(elementQuery);
 
         if (!this.mount) {
-            console.error("[Wave/App] Failed to mount app");
+            console.error("[WaveApp] Failed to mount app");
             return;
         }
 
@@ -47,7 +47,7 @@ class WaveApp {
 
             const elements = this.mount.getElementsByTagName("*");
 
-            new DataListener(this.store.data, key, this, this.dataRefreshRate);
+            new WaveDataListener(this.store.data, key, this, this.dataRefreshRate);
 
             for (let j = 0; j < elements.length; j++) {
                 const element = elements[j];
@@ -67,8 +67,8 @@ class WaveApp {
             const element = elements[i];
             let attribute = element.getAttribute("wave-condition");
 
-            for (let j = 0; j < store.logicalOperators.length; j++) {
-                const logicalOperator = store.logicalOperators[j];
+            for (let j = 0; j < _store.logicalOperators.length; j++) {
+                const logicalOperator = _store.logicalOperators[j];
                 
                 if (!attribute.includes(logicalOperator.attributeString))
                     continue;
@@ -77,7 +77,7 @@ class WaveApp {
 
                 const split = attribute.split(logicalOperator.attributeString);
 
-                element.style.display = logicalOperator.handler(Utils.ParseArgument(split[0], this.store.data), Utils.ParseArgument(split[1], this.store.data)) ? "" : "none";
+                element.style.display = logicalOperator.handler(WaveUtils.ParseArgument(split[0], this.store.data), WaveUtils.ParseArgument(split[1], this.store.data)) ? "" : "none";
             }
         }
     };
@@ -88,8 +88,8 @@ class WaveApp {
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
 
-            for (let j = 0; j < store.events.length; j++) {
-                const event = store.events[j];
+            for (let j = 0; j < _store.events.length; j++) {
+                const event = _store.events[j];
                 const attribute = element.getAttribute(`wave-event:${event.name}`);
 
                 if (attribute == undefined)
@@ -99,8 +99,25 @@ class WaveApp {
                 const method = split[0];
                 const args = split[1].replace(")", "").split(", ");
 
-                for (let i = 0; i < args.length; i++)
-                    args[i] = Utils.ParseArgument(...args, this.store.data);
+                for (let k = 0; k < args.length; k++) {
+                    let argument = WaveUtils.ParseArgument(args[k], this.store.data);
+
+                    if (argument != undefined) {
+                        args[k] = argument;
+                        continue;
+                    }
+
+                    const elements = document.querySelectorAll(`[wave-id="${args[k]}"]`);
+
+                    if (elements.length < 1) {
+                        args[k] = undefined;
+                        continue;
+                    }
+
+                    const element = elements[0];
+
+                    args[k] = element;
+                }
 
                 event.handler(element, this.store.methods[method], ...args);
             }
