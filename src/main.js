@@ -8,19 +8,19 @@ store.logicalOperators.push(new LogicalOperator("=", (data, compareWith) => {
 }));
 
 store.logicalOperators.push(new LogicalOperator(">", (data, compareWith) => {
-    return Number(data) > Number(compareWith);
+    return data > compareWith;
 }));
 
 store.logicalOperators.push(new LogicalOperator(">=", (data, compareWith) => {
-    return Number(data) >= Number(compareWith);
+    return data >= compareWith;
 }));
 
 store.logicalOperators.push(new LogicalOperator("<", (data, compareWith) => {
-    return Number(data) < Number(compareWith);
+    return data < compareWith;
 }));
 
 store.logicalOperators.push(new LogicalOperator("<=", (data, compareWith) => {
-    return Number(data) <= Number(compareWith);
+    return data <= compareWith;
 }));
 
 // Create events

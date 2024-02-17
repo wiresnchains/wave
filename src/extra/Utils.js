@@ -18,7 +18,7 @@ const WaveUtils = {
         return element;
     },
 
-    ParseArgument: (argument, objectData) => {
+    ParseArgument: (argument, appStore) => {
         const firstChar = argument.charAt(0);
         const isString = firstChar == "\"" || firstChar == "'";
 
@@ -28,8 +28,8 @@ const WaveUtils = {
             argument == "true" ? true :
             argument == "false" ? false :
             isString ? argument.slice(1).slice(0, -1) :
-            firstChar == "!" ? !(objectData[argument.slice(1)]) :
-            objectData[argument];
+            firstChar == "!" ? !(appStore[argument.slice(1)]) :
+            appStore[argument];
     }
 };
 
