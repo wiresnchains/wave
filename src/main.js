@@ -3,23 +3,23 @@ import Event from "./classes/Event";
 import store from "./store";
 
 // Create logical operators
-store.logicalOperators.push(new LogicalOperator(" = ", (data, compareWith) => {
+store.logicalOperators.push(new LogicalOperator("=", (data, compareWith) => {
     return data == compareWith;
 }));
 
-store.logicalOperators.push(new LogicalOperator(" > ", (data, compareWith) => {
+store.logicalOperators.push(new LogicalOperator(">", (data, compareWith) => {
     return Number(data) > Number(compareWith);
 }));
 
-store.logicalOperators.push(new LogicalOperator(" >= ", (data, compareWith) => {
+store.logicalOperators.push(new LogicalOperator(">=", (data, compareWith) => {
     return Number(data) >= Number(compareWith);
 }));
 
-store.logicalOperators.push(new LogicalOperator(" <", (data, compareWith) => {
+store.logicalOperators.push(new LogicalOperator("<", (data, compareWith) => {
     return Number(data) < Number(compareWith);
 }));
 
-store.logicalOperators.push(new LogicalOperator(" <=", (data, compareWith) => {
+store.logicalOperators.push(new LogicalOperator("<=", (data, compareWith) => {
     return Number(data) <= Number(compareWith);
 }));
 

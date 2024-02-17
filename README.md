@@ -12,24 +12,34 @@ A pure-js framework for frontend development
     <body>
         <div id="app">
             <h1>You have clicked the button {{ count }} times.</h1>
+            <button wave-event:click="increment(1)">Click</button>
+            <button wave-event:click="toggleSecretMessage()">Toggle Secret Message</button>
             <h4 wave-condition="count >= 10">You have clicked the button over 10 times!</h4>
-            <button wave-event:click="increment()">Click</button>
+            <h4 wave-condition="displaySecretMessage = true">This is the secret message!</h4>
         </div>
         <script src="wave.js" type="text/javascript"></script>
         <script type="text/javascript">
             // Interval between updating DOM variables in milliseconds
             const dataRefreshRate = 100;
 
-            const exampleApp = new WaveApp("#app", new WaveAppStore({
+            const exampleApp = new WaveApp(dataRefreshRate);
+
+            exampleApp.useStore(new WaveAppStore({
                 data: {
-                    count: 5
+                    count: 0,
+                    displaySecretMessage: false
                 },
                 methods: {
-                    increment: () => {
-                        exampleApp.store.data.count += 1;
+                    increment: (amount) => {
+                        exampleApp.store.data.count += amount;
+                    },
+                    toggleSecretMessage: () => {
+                        exampleApp.store.data.displaySecretMessage = !exampleApp.store.data.displaySecretMessage;
                     }
                 }
-            }), dataRefreshRate);
+            }));
+
+            exampleApp.mount("#app");
         </script>
     </body>
 </html>
@@ -42,8 +52,7 @@ A pure-js framework for frontend development
 - `<` Less than
 - `<=` Less than or equal to
 
-### Events
-How to use? Add an `wave-event:type="method()"` attribute to your element. Available event types are listed below.
+### Events (wave-event)
 - `click` Triggers on mouse click
 - `input` Triggers when an element recieves input
 - `change` Triggers on element's value change

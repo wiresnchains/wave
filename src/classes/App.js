@@ -1,42 +1,37 @@
 import AppStore from "./AppStore";
 import DataListener from "./DataListener";
+import Utils from "../extra/Utils";
 import store from "../store";
 
-function getElement(query) {
-    const firstChar = query.charAt(0);
-    const type = firstChar == "#" ? "id" : firstChar == "." ? "class" : null;
-
-    if (!type) {
-        console.error(`[Wave/App] Could not resolve element type: ${query}`);
-        return;
-    }
-
-    let element = type == "class" ? document.getElementsByClassName(query.slice(1))[0] : document.getElementById(query.slice(1));
-
-    if (!element) {
-        console.error(`Element not found: Name: "${query}", type: "${type}"`);
-        return;
-    }
-    
-    return element;
-};
-
 class WaveApp {
-    constructor(mountId, store, dataRefreshRate) {
-        this.mountId = mountId;
-        this.store = store || new AppStore();
+    constructor(dataRefreshRate = 100) {
         this.dataRefreshRate = dataRefreshRate;
-
-        this.mount();
+        this.store = new AppStore();
     };
 
-    mount() {
-        this.mount = getElement(this.mountId);
-
-        if (!this.checkMount())
+    useStore(store = new AppStore()) {
+        if (!store.constructor || store.constructor.name != "WaveAppStore") {
+            console.error("[Wave/App] Store is not a `WaveAppStore`");
             return;
+        }
 
-        console.log("[Wave/App] Mounted");
+        this.store = store;
+    };
+
+    mount(elementQuery) {
+        if (!this.store) {
+            console.error("[Wave/App] Store not found, failed to mount app");
+            return;
+        }
+
+        this.mount = Utils.GetElement(elementQuery);
+
+        if (!this.mount) {
+            console.error("[Wave/App] Failed to mount app");
+            return;
+        }
+
+        console.log("[Wave/App] Mounted app");
 
         this.initStore();
         this.updateConditionals();
@@ -70,7 +65,7 @@ class WaveApp {
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
-            const attribute = element.getAttribute("wave-condition");
+            let attribute = element.getAttribute("wave-condition");
 
             for (let j = 0; j < store.logicalOperators.length; j++) {
                 const logicalOperator = store.logicalOperators[j];
@@ -78,9 +73,11 @@ class WaveApp {
                 if (!attribute.includes(logicalOperator.attributeString))
                     continue;
 
+                attribute = attribute.replaceAll(" ", "");
+
                 const split = attribute.split(logicalOperator.attributeString);
 
-                element.style.display = logicalOperator.handler(this.store.data[split[0]], split[1]) ? "" : "none";
+                element.style.display = logicalOperator.handler(Utils.ParseArgument(split[0], this.store.data), Utils.ParseArgument(split[1], this.store.data)) ? "" : "none";
             }
         }
     };
@@ -101,6 +98,9 @@ class WaveApp {
                 const split = attribute.split("(");
                 const method = split[0];
                 const args = split[1].replace(")", "").split(", ");
+
+                for (let i = 0; i < args.length; i++)
+                    args[i] = Utils.ParseArgument(...args, this.store.data);
 
                 event.handler(element, this.store.methods[method], ...args);
             }
@@ -123,15 +123,6 @@ class WaveApp {
         this.updateConditionals();
         this.updateEvents();
     };
-
-    checkMount() {
-        if (!this.mount) {
-            console.error(`[Wave/App] Failed to mount app`);
-            return false;
-        }
-
-        return true;
-    }
 };
 
 export default WaveApp;
