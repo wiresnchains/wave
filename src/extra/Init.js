@@ -11,23 +11,23 @@ function CreateLogicalOperators() {
 
     _store.logicalOperators = [];
 
-    _store.logicalOperators.push(new LogicalOperator("=", (data, compareWith) => {
+    _store.logicalOperators.push(new LogicalOperator(" = ", (data, compareWith) => {
         return data == compareWith;
     }));
     
-    _store.logicalOperators.push(new LogicalOperator(">", (data, compareWith) => {
+    _store.logicalOperators.push(new LogicalOperator(" > ", (data, compareWith) => {
         return data > compareWith;
     }));
     
-    _store.logicalOperators.push(new LogicalOperator(">=", (data, compareWith) => {
+    _store.logicalOperators.push(new LogicalOperator(" >= ", (data, compareWith) => {
         return data >= compareWith;
     }));
     
-    _store.logicalOperators.push(new LogicalOperator("<", (data, compareWith) => {
+    _store.logicalOperators.push(new LogicalOperator(" < ", (data, compareWith) => {
         return data < compareWith;
     }));
     
-    _store.logicalOperators.push(new LogicalOperator("<=", (data, compareWith) => {
+    _store.logicalOperators.push(new LogicalOperator( " <= ", (data, compareWith) => {
         return data <= compareWith;
     }));
 };

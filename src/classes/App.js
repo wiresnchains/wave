@@ -65,20 +65,32 @@ class WaveApp {
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
-            let attribute = element.getAttribute("wave-condition");
+            const attribute = element.getAttribute("wave-condition");
 
-            for (let j = 0; j < _store.logicalOperators.length; j++) {
-                const logicalOperator = _store.logicalOperators[j];
-                
-                if (!attribute.includes(logicalOperator.attributeString))
-                    continue;
+            const conditions = attribute.split(" && ");
+            let conditionsMet = true;
 
-                attribute = attribute.replaceAll(" ", "");
+            for (let j = 0; j < conditions.length; j++) {
+                let condition = conditions[j];
+                let conditionMet = false;
 
-                const split = attribute.split(logicalOperator.attributeString);
+                for (let k = 0; k < _store.logicalOperators.length; k++) {
+                    const logicalOperator = _store.logicalOperators[k];
+                    
+                    if (!condition.includes(logicalOperator.attributeString))
+                        continue;
 
-                element.style.display = logicalOperator.handler(WaveUtils.ParseArgument(split[0], this.store.data), WaveUtils.ParseArgument(split[1], this.store.data)) ? "" : "none";
+                    const split = condition.split(logicalOperator.attributeString);
+                    conditionMet = logicalOperator.handler(WaveUtils.ParseArgument(split[0], this.store.data), WaveUtils.ParseArgument(split[1], this.store.data));
+                }
+
+                if (!conditionMet) {
+                    conditionsMet = false;
+                    break;
+                }
             }
+
+            element.style.display = conditionsMet ? "" : "none";
         }
     };
 
