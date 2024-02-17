@@ -1,4 +1,5 @@
 ## 🌊 Wave.js
+<img src="https://img.shields.io/badge/version-v1.0.5-blue"/> <img src="https://img.shields.io/badge/license-MIT-green"/><br/>
 **Wave** is an open-source, lightweight framework for for frontend development written in pure JavaScript.<br/>
 It useful for writing logical operations, adding events and rendering dynamic UI elements in your web application.<br/>
 It is written so that it **does not** overlap with any other web-frameworks that you would want to use.

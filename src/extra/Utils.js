@@ -1,4 +1,7 @@
 function GetElement(query) {
+    if (!query || typeof(query) !== "string")
+        return;
+    
     const firstChar = query.charAt(0);
     const type = firstChar == "#" ? "id" : firstChar == "." ? "class" : null;
 
@@ -18,6 +21,9 @@ function GetElement(query) {
 };
 
 function ParseArgument(argument, appStore) {
+    if (!argument || typeof(argument) !== "string")
+        return undefined;
+
     const firstChar = argument.charAt(0);
     const lastChar = argument.charAt(argument.length - 1);
     const isString = (firstChar == "\"" || firstChar == "'") && (lastChar == "\"" || lastChar == "'");
@@ -29,7 +35,8 @@ function ParseArgument(argument, appStore) {
         argument == "false" ? false :
         isString ? argument.slice(1).slice(0, -1) :
         firstChar == "!" ? !(appStore[argument.slice(1)]) :
-        appStore[argument];
+        appStore ? appStore[argument] :
+        undefined;
 };
 
 export default { GetElement, ParseArgument };
