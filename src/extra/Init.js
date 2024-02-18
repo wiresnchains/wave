@@ -41,15 +41,15 @@ function CreateEvents() {
     _store.events = [];
 
     _store.events.push(new Event("click", (element, callback, ...args) => {
-        element.onclick = callback ? () => { callback(...args) } : undefined;
+        element.events.onclick = callback ? () => { callback(...args) } : undefined;
     }));
     
     _store.events.push(new Event("input", (element, callback, ...args) => {
-        element.oninput = callback ? () => { callback(...args) } : undefined;
+        element.events.oninput = callback ? () => { callback(...args) } : undefined;
     }));
     
     _store.events.push(new Event("change", (element, callback, ...args) => {
-        element.onchange = callback ? () => { callback(...args) } : undefined;
+        element.events.onchange = callback ? () => { callback(...args) } : undefined;
     }));
 };
 

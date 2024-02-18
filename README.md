@@ -1,8 +1,8 @@
 ## 🌊 Wave.js
-<img src="https://img.shields.io/badge/version-v1.0.6-blue"/> <img src="https://img.shields.io/badge/license-MIT-green"/><br/>
+<img src="https://img.shields.io/badge/version-v1.0.7-blue"/> <img src="https://img.shields.io/badge/license-MIT-green"/><br/>
 **Wave** is an open-source, lightweight framework for frontend development written in pure JavaScript.<br/>
-It useful for writing logical operations, adding events and rendering dynamic UI elements in your web application.<br/>
-It is written so that it **does not** overlap with any other web-frameworks that you would want to use.
+It functions on a Virtual DOM tree, updating the mounted element from a stored object.<br/>
+It useful for writing logical operations, adding events and rendering dynamic UI elements in your web application.
 
 ### 👋 Getting Started
 - [Installing a pre-built release of wave.js](https://github.com/flowxrc/wave/wiki/Installation-(pre%E2%80%90built))

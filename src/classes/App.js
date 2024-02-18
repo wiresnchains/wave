@@ -1,8 +1,9 @@
 import WaveStore from "./Store";
 import WaveDataListener from "./DataListener";
 import WaveUtils from "../extra/Utils";
+import WaveVirtualDOM from "./VirtualDOM";
+import WaveVirtualDOMElement from "./VirtualDOMElement";
 import _store from "../_store";
-import Utils from "../extra/Utils";
 
 class WaveApp {
     /**
@@ -15,7 +16,7 @@ class WaveApp {
     };
 
     useStore(store) {
-        if (!Utils.IsObjectClassValid(store, WaveStore)) {
+        if (!WaveUtils.IsObjectClassValid(store, WaveStore)) {
             console.error("[WaveApp] Store is not a `WaveStore`");
             return;
         }
@@ -24,27 +25,36 @@ class WaveApp {
     };
 
     mount(elementQuery) {
-        if (!this.store || !Utils.IsObjectClassValid(store, WaveStore)) {
+        if (!this.store || !WaveUtils.IsObjectClassValid(store, WaveStore)) {
             console.error("[WaveApp] Store not found, failed to mount app");
             return;
         }
 
-        this.mount = WaveUtils.GetElement(elementQuery);
+        if (this.virtualDOM) {
+            console.error("[WaveApp] App is already mounted");
+            return;
+        }
 
-        if (!this.mount) {
+        const mountElement = WaveUtils.GetElement(elementQuery);
+
+        if (!mountElement) {
             console.error("[WaveApp] Failed to mount app");
             return;
         }
 
-        console.log("[Wave/App] Mounted app");
+        this.virtualDOM = new WaveVirtualDOM(mountElement);
 
         this.initStore();
         this.updateConditionals();
         this.updateEvents();
+
+        this.virtualDOM.updateActualDOM();
+
+        console.log("[Wave/App] Mounted app");
     };
 
     initStore() {
-        if (!this.mount) {
+        if (!this.virtualDOM) {
             console.error("[WaveApp] Attempted to initialize store before mounting app");
             return;
         }
@@ -55,53 +65,79 @@ class WaveApp {
             const key = keys[i];
             const value = this.store.data[key];
 
-            const elements = this.mount.getElementsByTagName("*");
+            const elements = this.virtualDOM.getChildrenRecursive();
 
-            this.store.dataListeners[key] = new WaveDataListener(this.store.data, key, this, this.dataRefreshRate);
+            this.store.dataListeners[key] = new WaveDataListener(this.store.data, key, this.dataRefreshRate, () => {
+                this.dataChanged();
+            });
 
             for (let j = 0; j < elements.length; j++) {
                 const element = elements[j];
 
-                if (!element.innerHTML.includes(`{{ ${key} }}`))
+                if (!element.text || !element.text.includes(`{{ ${key} }}`))
                     continue;
 
-                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span wave-data="${key}">${value}</span>`);
+                const textElements = element.text.split(`{{ ${key} }}`);
+
+                for (let i = 0; i < textElements.length; i++) {
+                    if (textElements[i]) {
+                        new WaveVirtualDOMElement(element.parent, {
+                            text: textElements[i]
+                        });
+
+                        const newElement = new WaveVirtualDOMElement(element.parent, {
+                            tag: "span",
+                            attributes: {
+                                "wave-data": key
+                            }
+                        });
+
+                        new WaveVirtualDOMElement(newElement, {
+                            text: value
+                        });
+                    }
+                }
+
+                element.destroy();
             }
         }
     };
 
     updateConditionals() {
-        if (!this.mount) {
+        if (!this.virtualDOM) {
             console.error("[WaveApp] Attempted to update conditionals before mounting app");
             return;
         }
 
-        const elements = this.mount.querySelectorAll("[wave-condition]");
+        const elements = this.virtualDOM.getElementsByAttribute("wave-condition");
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
-            const attribute = element.getAttribute("wave-condition");
+            const attribute = element.attributes["wave-condition"];
 
-            const conditionsMet = Utils.ParseCondition(attribute, this.store);
+            const conditionsMet = WaveUtils.ParseCondition(attribute, this.store);
 
-            element.style.display = conditionsMet ? "" : "none";
+            element.visible = conditionsMet;
         }
     };
 
     updateEvents() {
-        if (!this.mount) {
+        if (!this.virtualDOM) {
             console.error("[WaveApp] Attempted to update events before mounting app");
             return;
         }
 
-        const elements = this.mount.querySelectorAll("*");
+        const elements = this.virtualDOM.getChildrenRecursive();
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
 
+            if (!element.attributes)
+                continue;
+
             for (let j = 0; j < _store.events.length; j++) {
                 const event = _store.events[j];
-                const attribute = element.getAttribute(`wave-event:${event.name}`);
+                const attribute = element.attributes[`wave-event:${event.name}`];
 
                 if (attribute == undefined)
                     continue;
@@ -118,7 +154,7 @@ class WaveApp {
                         continue;
                     }
 
-                    const elements = document.querySelectorAll(`[wave-id="${args[k]}"]`);
+                    const elements = this.virtualDOM.getElementsByAttribute("wave-id", args[k]);
 
                     if (elements.length < 1) {
                         args[k] = undefined;
@@ -136,7 +172,7 @@ class WaveApp {
     };
 
     dataChanged() {
-        if (!this.mount) {
+        if (!this.virtualDOM) {
             console.error("[WaveApp] Attempted to update DOM before mounting app");
             return;
         }
@@ -147,18 +183,20 @@ class WaveApp {
             const key = keys[i];
             const value = this.store.data[key];
 
-            const elements = this.mount.querySelectorAll(`[wave-data="${key}"]`);
+            const elements = this.virtualDOM.getElementsByAttribute("wave-data", key);
 
             for (let j = 0; j < elements.length; j++)
-                elements[j].innerHTML = value;
+                elements[j].text = value;
         }
 
         this.updateConditionals();
         this.updateEvents();
+
+        this.virtualDOM.updateActualDOM();
     };
     
     unmount() {
-        if (!this.mount) {
+        if (!this.virtualDOM) {
             console.error("[WaveApp] Attempted to unmount before mounting app");
             return;
         }
@@ -167,12 +205,6 @@ class WaveApp {
         
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
-
-            const elements = this.mount.querySelectorAll(`[wave-data="${key}"]`);
-
-            for (let j = 0; j < elements.length; j++)
-                elements[j].outerHTML = `{{ ${key} }}`;
-
             const listener = this.store.dataListeners[key];
 
             if (!listener)
@@ -182,28 +214,9 @@ class WaveApp {
             delete this.store.dataListeners[key];
         }
 
-        const conditionElements = this.mount.querySelectorAll("[wave-condition]");
+        this.virtualDOM.acutalElement.outerHTML = this.virtualDOM.originalState;
 
-        for (let i = 0; i < conditionElements.length; i++)
-            conditionElements[i].style.display = "";
-
-        const elements = this.mount.querySelectorAll("*");
-
-        for (let i = 0; i < elements.length; i++) {
-            const element = elements[i];
-
-            for (let j = 0; j < _store.events.length; j++) {
-                const event = _store.events[j];
-                const attribute = element.getAttribute(`wave-event:${event.name}`);
-
-                if (attribute == undefined)
-                    continue;
-
-                event.handler(element, undefined);
-            }
-        }
-
-        delete this.mount;
+        delete this.virtualDOM;
 
         console.log("[Wave/App] Unmounted app");
     };

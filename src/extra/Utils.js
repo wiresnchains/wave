@@ -4,6 +4,7 @@ import _store from "../_store";
 /**
  * Search for a DOM element by it's class name or id
  * @param {string} query
+ * @returns {HTMLElement|undefined}
  */
 function GetElement(query) {
     if (!query || typeof(query) !== "string")
@@ -40,6 +41,7 @@ function IsObjectClassValid(object, requiredClass) {
  * Parse an argument from a string
  * @param {string} argument
  * @param {WaveStore} waveStore
+ * @returns {any}
  */
 function ParseArgument(argument, waveStore) {
     if (!argument || typeof(argument) !== "string" || !IsObjectClassValid(waveStore, WaveStore))
@@ -63,6 +65,7 @@ function ParseArgument(argument, waveStore) {
  * Parse the "wave-condition" attribute in the DOM
  * @param {string} conditionString
  * @param {WaveStore} waveStore
+ * @returns {boolean}
  */
 function ParseCondition(conditionString, waveStore) {
     if (!IsObjectClassValid(waveStore, WaveStore)) {
