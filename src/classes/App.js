@@ -25,7 +25,7 @@ class WaveApp {
     };
 
     mount(elementQuery) {
-        if (!this.store || !WaveUtils.IsObjectClassValid(store, WaveStore)) {
+        if (!this.store || !WaveUtils.IsObjectClassValid(this.store, WaveStore)) {
             console.error("[WaveApp] Store not found, failed to mount app");
             return;
         }
@@ -73,29 +73,40 @@ class WaveApp {
 
             for (let j = 0; j < elements.length; j++) {
                 const element = elements[j];
+                const term = `{{ ${key} }}`;
 
-                if (!element.text || !element.text.includes(`{{ ${key} }}`))
+                if (!element.text || !element.text.includes(term))
                     continue;
 
-                const textElements = element.text.split(`{{ ${key} }}`);
+                const textElements = element.text.split(term);
+                const termOccurances = textElements.length - 1;
 
-                for (let i = 0; i < textElements.length; i++) {
+                for (let i = 0; i < termOccurances; i++) {
                     if (textElements[i]) {
                         new WaveVirtualDOMElement(element.parent, {
                             text: textElements[i]
                         });
-
-                        const newElement = new WaveVirtualDOMElement(element.parent, {
-                            tag: "span",
-                            attributes: {
-                                "wave-data": key
-                            }
-                        });
-
-                        new WaveVirtualDOMElement(newElement, {
-                            text: value
-                        });
                     }
+
+                    const newElement = new WaveVirtualDOMElement(element.parent, {
+                        tag: "span",
+                        attributes: {
+                            "wave-data": key
+                        }
+                    });
+    
+                    new WaveVirtualDOMElement(newElement, {
+                        text: value
+                    });
+                }
+
+                for (let i = termOccurances; i < textElements.length; i++) {
+                    if (!textElements[i])
+                        continue;
+
+                    new WaveVirtualDOMElement(element.parent, {
+                        text: textElements[i]
+                    });
                 }
 
                 element.destroy();
