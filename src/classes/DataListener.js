@@ -1,4 +1,17 @@
+/**
+ * @name DataChangeCallback
+ * @function
+ * @param {VoidFunction} dataChanged
+ */
+
 class WaveDataListener {
+    /**
+     * Listens for variable changes and calls back when it has changed
+     * @param {object} object 
+     * @param {string} key 
+     * @param {DataChangeCallback} callbackObject 
+     * @param {number} refrestRate 
+     */
     constructor(object, key, callbackObject, refrestRate) {
         if (!callbackObject.dataChanged) {
             console.error("[WaveDataListener] `callbackObject` has no `dataChanged()` method.");
@@ -16,7 +29,7 @@ class WaveDataListener {
     };
 
     listen() {
-        setInterval(() => {
+        this.interval = setInterval(() => {
             const currentValue = this.object[this.key];
     
             if (this.previousValue === currentValue)
@@ -26,6 +39,10 @@ class WaveDataListener {
     
             this.previousValue = currentValue;
         }, this.refrestRate);
+    };
+
+    stop() {
+        clearInterval(this.interval);
     };
 };
 
