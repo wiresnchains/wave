@@ -40,16 +40,16 @@ function CreateEvents() {
     
     _store.events = [];
 
-    _store.events.push(new Event("click", (element, callback, ...args) => {
-        element.events.onclick = callback ? () => { callback(...args) } : undefined;
+    _store.events.push(new Event("click", (element, callback) => {
+        element.events.onclick = callback ? callback : undefined;
     }));
     
-    _store.events.push(new Event("input", (element, callback, ...args) => {
-        element.events.oninput = callback ? () => { callback(...args) } : undefined;
+    _store.events.push(new Event("input", (element, callback) => {
+        element.events.oninput = callback ? callback : undefined;
     }));
     
-    _store.events.push(new Event("change", (element, callback, ...args) => {
-        element.events.onchange = callback ? () => { callback(...args) } : undefined;
+    _store.events.push(new Event("change", (element, callback) => {
+        element.events.onchange = callback ? callback : undefined;
     }));
 };
 

@@ -32,7 +32,7 @@ class WaveVirtualDOMElement {
     /**
      * Load Virtual DOM element paremeters from an HTML element or Node
      * WARNING: This does not change the parent specified in the constructor
-     * @param {HTNLElement|Node} element
+     * @param {HTMLElement|Node} element
      */
     loadFromDOMElement(element) {
         if (element.nodeType === Node.TEXT_NODE) {
@@ -59,6 +59,9 @@ class WaveVirtualDOMElement {
 
         if (this.text)
             return document.createTextNode(this.text);
+
+        if (!this.attributes)
+            return;
 
         const element = document.createElement(this.tag);
 
@@ -88,6 +91,8 @@ class WaveVirtualDOMElement {
 
             element.appendChild(node);
         }
+
+        this.htmlElement = element;
 
         return element;
     };

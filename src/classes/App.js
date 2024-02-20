@@ -96,7 +96,7 @@ class WaveApp {
                     });
     
                     new WaveVirtualDOMElement(newElement, {
-                        text: value
+                        text: `${value}`
                     });
                 }
 
@@ -157,27 +157,29 @@ class WaveApp {
                 const method = split[0];
                 const args = split[1].replace(")", "").split(", ");
 
-                for (let k = 0; k < args.length; k++) {
-                    let argument = WaveUtils.ParseArgument(args[k], this.store);
+                event.handler(element, () => {
+                    for (let k = 0; k < args.length; k++) {
+                        let argument = WaveUtils.ParseArgument(args[k], this.store);
 
-                    if (argument != undefined) {
-                        args[k] = argument;
-                        continue;
+                        if (argument != undefined) {
+                            args[k] = argument;
+                            continue;
+                        }
+
+                        const elements = this.virtualDOM.getElementsByAttribute("wave-id", args[k]);
+
+                        if (!elements || elements.length < 1) {
+                            args[k] = undefined;
+                            continue;
+                        }
+
+                        const element = elements[0];
+
+                        args[k] = element.htmlElement;
                     }
 
-                    const elements = this.virtualDOM.getElementsByAttribute("wave-id", args[k]);
-
-                    if (elements.length < 1) {
-                        args[k] = undefined;
-                        continue;
-                    }
-
-                    const element = elements[0];
-
-                    args[k] = element;
-                }
-
-                event.handler(element, this.store.methods[method], ...args);
+                    this.store.methods[method](...args);
+                });
             }
         }
     };
