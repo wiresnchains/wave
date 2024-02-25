@@ -67,7 +67,7 @@ class WaveApp {
 
             const elements = this.virtualDOM.getChildrenRecursive();
 
-            this.store.dataListeners[key] = new WaveDataListener(this.store.data, key, this.dataRefreshRate, () => {
+            this.store.dataListeners[key] = new WaveDataListener(this.store, key, this.dataRefreshRate, () => {
                 this.dataChanged();
             });
 

@@ -132,7 +132,7 @@ class WaveVirtualDOMElement {
         }
 
         for (let i = 0; i < this.children.length; i++)
-            elements = elements.concat(this.children[i].getElementsByAttribute(attributeName));
+            elements = elements.concat(this.children[i].getElementsByAttribute(attributeName, value));
 
         return elements;
     };
