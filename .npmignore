@@ -1,3 +1,6 @@
 # Source
 src/
 tsconfig.json
+
+# Bundle
+dist/wave.js
