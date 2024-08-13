@@ -1,3 +1,5 @@
-/node_modules
-/dist
-package-lock.json
+# Node
+node_modules/
+
+# Build
+dist/

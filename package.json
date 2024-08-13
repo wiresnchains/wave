@@ -1,20 +1,30 @@
 {
-  "name": "wave",
-  "version": "1.0.8",
-  "description": "A lightweight framework for frontend development written in pure JavaScript.",
-  "author": "flowxrc",
-  "license": "MIT",
-  "type": "module",
+  "name": "@wave-frontend/wave-js",
+  "version": "1.0.0",
+  "description": "An open-source, lightweight framework for frontend development written in TypeScript.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "node scripts/bundler.js"
+    "build": "tsup src/index.ts && dets src/index.ts --name @wave-frontend/wave-js --files src/**/*.ts --out dist/index.d.ts"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/flowxrc/wave"
+    "url": "git+https://github.com/wiresnchains/wave.git"
   },
+  "keywords": [
+    "framework",
+    "js",
+    "frontend",
+    "wavejs"
+  ],
+  "author": "wiresnchains",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wiresnchains/wave/issues"
+  },
+  "homepage": "https://github.com/wiresnchains/wave#readme",
   "devDependencies": {
-    "colorette": "^2.0.20",
-    "esbuild": "^0.20.0",
-    "fs-jetpack": "^5.1.0"
+    "dets": "^0.16.0",
+    "tsup": "^8.2.4"
   }
 }
