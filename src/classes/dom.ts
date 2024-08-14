@@ -1,5 +1,5 @@
 class WaveDom {
-    private rootElement: Element;
+    public rootElement: Element;
 
     constructor(rootElement: Element) {
         this.rootElement = rootElement;

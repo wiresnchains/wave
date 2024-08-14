@@ -78,6 +78,15 @@ class WaveApp {
         this.store = this.nativeStore;
     }
 
+    public getMount(): Element | undefined {
+        if (!this.mountedDom) {
+            console.error(WaveErrors.notMounted);
+            return;
+        }
+
+        return this.mountedDom.rootElement;
+    }
+
     private initializeMountedElement(): void {
         if (!this.mountedDom)
             return console.error(WaveErrors.notMounted);
@@ -100,7 +109,7 @@ class WaveApp {
                 if (!element.innerHTML.includes(`{{ ${key} }}`))
                     continue;
 
-                element.innerHTML = element.innerHTML.replace(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
+                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
             }
         }
     }
