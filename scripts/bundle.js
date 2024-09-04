@@ -9,3 +9,5 @@ esbuild.build({
     format: "cjs",
     plugins: [esbuildPluginTsc()]
 });
+
+// Remember that if we change what we build, we should also update .npmignore
