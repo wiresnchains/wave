@@ -2,7 +2,8 @@
     "compilerOptions": {
         "target": "es2021",
         "module": "es6",
-        "strict": true
+        "strict": true,
+        "types": ["./src/@types", "./node_modules/@types/node"]
     },
     "include": ["./src/**/*.ts"],
     "exclude": ["./node_modules"]

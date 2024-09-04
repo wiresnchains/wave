@@ -1,5 +1,5 @@
-import { WaveApp } from "./classes/app";
-import { WaveStore } from "./classes/store";
+import { WaveApp } from "./app/app";
+import { WaveStore } from "./app/store";
 
 // note: remember that we should also change the bundle.ts :)
 

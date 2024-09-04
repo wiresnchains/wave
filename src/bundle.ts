@@ -1,1 +1,2 @@
-require("./classes/app");
+require("./app/store");
+require("./app/app");
