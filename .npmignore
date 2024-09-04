@@ -1,6 +1,9 @@
 # Source
 src/
+scripts/
 tsconfig.json
 
-# Bundle
-dist/wave.js
+# Build
+dist/*
+!dist/index.js
+!dist/index.d.ts
