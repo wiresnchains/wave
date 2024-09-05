@@ -22,6 +22,9 @@ export class WaveApp {
     }
 
     public mount() {
+        if (this.dom)
+            throw new Error(WaveMessages.alreadyMounted);
+        
         this.dom = new WaveDom(this.selector);
 
         for (let i = 0; i < this.stores.length; i++)
