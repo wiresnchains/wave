@@ -1,26 +1,4 @@
-import { WaveLogicalOperator } from "./logicalOperator";
-
-const LOGICAL_OPERATORS = [
-    new WaveLogicalOperator(" = ", (data, compareWith) => {
-        return data == compareWith;
-    }),
-
-    new WaveLogicalOperator(" > ", (data, compareWith) => {
-        return data > compareWith;
-    }),
-
-    new WaveLogicalOperator(" >= ", (data, compareWith) => {
-        return data >= compareWith;
-    }),
-
-    new WaveLogicalOperator(" < ", (data, compareWith) => {
-        return data < compareWith;
-    }),
-
-    new WaveLogicalOperator( " <= ", (data, compareWith) => {
-        return data <= compareWith;
-    })
-];
+import { LOGICAL_OPERATORS } from "../constants/logicalOperators";
 
 export namespace WaveParser {
     export function parseArgument(argument: string, data: WaveDictionary<any>) {

@@ -1,3 +1,5 @@
+import { WaveAttributes } from "../constants/attributes";
+import { WaveMessages } from "../constants/messages";
 import { WaveDom } from "../core/dom";
 import { WaveParser } from "../core/parser";
 import { WaveStore } from "../index";
@@ -14,7 +16,7 @@ export class WaveApp {
 
     public useStore(store: WaveStore) {
         if (this.dom)
-            throw new Error("Cannot use new stores while mounted");
+            throw new Error(WaveMessages.mountedUseStore);
 
         this.stores.push(store);
     }
@@ -30,6 +32,13 @@ export class WaveApp {
 
     public unmount() {
         delete this.dom;
+    }
+
+    public getMount() {
+        if (!this.dom)
+            return;
+
+        return this.dom.root;
     }
 
     private initializeMountedElement() {
@@ -50,7 +59,7 @@ export class WaveApp {
                 if (!element.innerHTML.includes(`{{ ${key} }}`))
                     continue;
 
-                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span wave-data="${key}">${value}</span>`);
+                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
             }
         }
 
@@ -61,7 +70,7 @@ export class WaveApp {
         if (!this.dom)
             return;
 
-        const elements = this.dom.getElementsByAttribute("wave-data", changedKey);
+        const elements = this.dom.getElementsByAttribute(WaveAttributes.data, changedKey);
         const value = instance.getValue(changedKey);
 
         for (let i = 0; i < elements.length; i++)
@@ -74,12 +83,12 @@ export class WaveApp {
         if (!this.dom)
             return;
 
-        const elements = this.dom.getElementsByAttribute("wave-condition");
+        const elements = this.dom.getElementsByAttribute(WaveAttributes.condition);
         const data = this.getMergedStoreData();
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i] as HTMLElement;
-            const attribute = element.getAttribute("wave-condition");
+            const attribute = element.getAttribute(WaveAttributes.condition);
 
             if (!attribute)
                 continue;
@@ -101,7 +110,7 @@ export class WaveApp {
                 const key = keys[j];
 
                 if (data[key])
-                    console.warn("Overlapping store keys", key, this);
+                    console.warn(WaveMessages.storeKeyOverlap, key, this);
 
                 data[key] = store.getValue(key);
             }

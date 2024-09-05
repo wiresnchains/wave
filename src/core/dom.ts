@@ -1,3 +1,5 @@
+import { WaveMessages } from "../constants/messages";
+
 export class WaveDom {
     private parent: Element;
 
@@ -5,9 +7,13 @@ export class WaveDom {
         const element = document.querySelector(selector);
 
         if (!element)
-            throw new Error("Element " + selector + " was not found");
+            throw new Error(WaveMessages.elementNotFound.replace("%s", selector));
 
         this.parent = element;
+    }
+
+    public get root() {
+        return this.parent;
     }
 
     public getAllElements() {
