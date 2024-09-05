@@ -1,3 +1,4 @@
+import { WaveDictionary } from "../@types/index";
 import { LOGICAL_OPERATORS } from "../constants/logicalOperators";
 
 export namespace WaveParser {

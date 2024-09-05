@@ -1,3 +1,5 @@
+import { WaveDataType, WaveDictionary, WaveProxyHandler } from "../@types/index";
+
 type WaveDataChangeCallback = (instance: WaveStore, changedKey: string) => void;
 
 export class WaveStore {

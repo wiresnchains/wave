@@ -1,3 +1,4 @@
+import { WaveDictionary } from "../@types/index";
 import { WaveAttributes } from "../constants/attributes";
 import { WaveMessages } from "../constants/messages";
 import { WaveDom } from "../core/dom";

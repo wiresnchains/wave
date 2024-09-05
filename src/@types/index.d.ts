@@ -1,7 +1,7 @@
-declare interface WaveDictionary<T> {
+export interface WaveDictionary<T> {
     [key: string]: T;
 }
 
-declare type WaveDataType = string | number | boolean;
-declare type WaveProxyHandler = (newValue: any) => Promise<boolean>;
-declare type WaveLogicalOperatorHandler = (data: any, compareWith: any) => boolean;
+export type WaveDataType = string | number | boolean;
+export type WaveProxyHandler = (newValue: any) => Promise<boolean>;
+export type WaveLogicalOperatorHandler = (data: any, compareWith: any) => boolean;
