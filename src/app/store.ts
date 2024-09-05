@@ -1,5 +1,7 @@
+type WaveDataChangeCallback = (instance: WaveStore, changedKey: string) => void;
+
 export class WaveStore {
-    public onDataChange?: (instance: WaveStore, changedKey: string) => void;
+    public dataChangeCallbacks: WaveDataChangeCallback[];
 
     private data: WaveDictionary<WaveDataType>;
     private proxies: WaveDictionary<WaveProxyHandler>;
@@ -7,6 +9,7 @@ export class WaveStore {
     constructor(from: { data?: WaveDictionary<WaveDataType>, proxies?: WaveDictionary<WaveProxyHandler> } = {}) {
         this.data = from.data || {};
         this.proxies = from.proxies || {};
+        this.dataChangeCallbacks = [];
     }
 
     public async setValue(key: string, value: WaveDataType) {
@@ -20,9 +23,9 @@ export class WaveStore {
         }
 
         this.data[key] = value;
-        
-        if (this.onDataChange)
-            this.onDataChange(this, key);
+
+        for (let i = 0; i < this.dataChangeCallbacks.length; i++)
+            this.dataChangeCallbacks[i](this, key);
     }
 
     public getValue(key: string) {
@@ -39,5 +42,9 @@ export class WaveStore {
 
     public getDataKeys() {
         return Object.keys(this.data);
+    }
+
+    public addDataChangeCallback(callback: WaveDataChangeCallback) {
+        this.dataChangeCallbacks.push(callback);
     }
 }

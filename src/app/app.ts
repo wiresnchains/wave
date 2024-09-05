@@ -28,7 +28,7 @@ export class WaveApp {
         this.dom = new WaveDom(this.selector);
 
         for (let i = 0; i < this.stores.length; i++)
-            this.stores[i].onDataChange = this.onDataChange.bind(this);
+            this.stores[i].addDataChangeCallback(this.onDataChange.bind(this));
 
         this.initializeMountedElement();
     }
