@@ -31,12 +31,37 @@ export class WaveApp {
     }
 
     public unmount() {
+        if (!this.dom)
+            throw new Error(WaveMessages.notMounted);
+
+        const data = this.getMergedStoreData();
+        const keys = Object.keys(data);
+
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const elements = this.dom.getElementsByAttribute(WaveAttributes.data, key);
+
+            for (let j = 0; j < elements.length; j++)
+                elements[j].outerHTML = `{{ ${key} }}`;
+        }
+
+        const conditionElements = this.dom.getElementsByAttribute(WaveAttributes.condition);
+
+        for (let i = 0; i < conditionElements.length; i++) {
+            const element = conditionElements[i] as HTMLElement;
+
+            if (element.style.display != "none")
+                continue;
+
+            element.style.display = "";
+        }
+
         delete this.dom;
     }
 
     public getMount() {
         if (!this.dom)
-            return;
+            throw new Error(WaveMessages.notMounted);
 
         return this.dom.root;
     }
