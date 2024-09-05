@@ -9,7 +9,8 @@ npm install @wave-frontend/wave-js
 ```
 
 ### 👋 Getting Started
-- You can look at a simple [counter app](https://github.com/wiresnchains/wave-counter) to see what the wave library is capable of.
+- [Creating your first app](https://github.com/wiresnchains/wave/wiki/Creating-your-first-app)
+- [Complete counter app example](https://github.com/wiresnchains/wave-counter)
 
 ### 📖 Wiki
 You can read our new [wiki page](https://github.com/flowxrc/wave/wiki) for the latest documentation with examples.
