@@ -1,7 +1,7 @@
 {
   "name": "@wave-frontend/wave-js",
-  "version": "1.0.3",
-  "description": "An open-source, lightweight framework for frontend development written in TypeScript.",
+  "version": "1.0.4",
+  "description": "An open-source, lightweight library for frontend development written in TypeScript.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,7 +14,7 @@
     "url": "git+https://github.com/wiresnchains/wave.git"
   },
   "keywords": [
-    "framework",
+    "library",
     "js",
     "frontend",
     "wavejs"

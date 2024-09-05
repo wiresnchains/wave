@@ -1,6 +1,6 @@
 ## 🌊 Wave
-<img src="https://img.shields.io/badge/version-v1.0.2-blue"/> <img src="https://img.shields.io/badge/license-MIT-green"/><br/>
-**Wave** is an open-source, lightweight framework for frontend development written in TypeScript.<br/>
+<img src="https://img.shields.io/badge/version-v1.0.4-blue"/> <img src="https://img.shields.io/badge/license-MIT-green"/><br/>
+**Wave** is an open-source, lightweight library for frontend development written in TypeScript.<br/>
 It useful for writing logical operations, adding events and rendering dynamic UI elements in your web application.
 
 ### 📄 Installation
