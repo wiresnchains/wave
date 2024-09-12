@@ -1,23 +1,23 @@
-import { WaveLogicalOperator } from "../core/logicalOperator";
+import { WaveDictionary, WaveLogicalOperatorHandler } from "../@types/index";
 
-export const LOGICAL_OPERATORS = [
-    new WaveLogicalOperator(" = ", (data, compareWith) => {
+export const WaveLogicalOperators: WaveDictionary<WaveLogicalOperatorHandler> = {
+    " = ": (data, compareWith) => {
         return data == compareWith;
-    }),
+    },
 
-    new WaveLogicalOperator(" > ", (data, compareWith) => {
+    " > ": (data, compareWith) => {
         return data > compareWith;
-    }),
+    },
 
-    new WaveLogicalOperator(" >= ", (data, compareWith) => {
+    " >= ": (data, compareWith) => {
         return data >= compareWith;
-    }),
+    },
 
-    new WaveLogicalOperator(" < ", (data, compareWith) => {
+    " < ": (data, compareWith) => {
         return data < compareWith;
-    }),
+    },
 
-    new WaveLogicalOperator( " <= ", (data, compareWith) => {
+    " <= ": (data, compareWith) => {
         return data <= compareWith;
-    })
-];
+    }
+}

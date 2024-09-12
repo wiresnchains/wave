@@ -1,5 +1,5 @@
 import { WaveDictionary } from "../@types/index";
-import { LOGICAL_OPERATORS } from "../constants/logicalOperators";
+import { WaveLogicalOperators } from "../constants/logicalOperators";
 
 export namespace WaveParser {
     export function parseArgument(argument: string, data: WaveDictionary<any>) {
@@ -26,18 +26,22 @@ export namespace WaveParser {
             const condition = conditions[i];
             let conditionMet = false;
 
-            for (let j = 0; j < LOGICAL_OPERATORS.length; j++) {
-                const logicalOperator = LOGICAL_OPERATORS[j];
+            // TODO: I didn't replace WaveLogicalOperators with a dictionary just to do this :(
+            const operators  = Object.keys(WaveLogicalOperators);
 
-                if (!condition.includes(logicalOperator.attribute))
+            for (let j = 0; j < operators.length; j++) {
+                const logicalOperator = operators[j];
+                const handler = WaveLogicalOperators[logicalOperator];
+
+                if (!condition.includes(logicalOperator))
                     continue;
 
-                const args = condition.split(logicalOperator.attribute);
+                const args = condition.split(logicalOperator);
 
                 if (args.length < 2)
                     continue;
 
-                conditionMet = logicalOperator.handler(WaveParser.parseArgument(args[0], data), WaveParser.parseArgument(args[1], data));
+                conditionMet = handler(WaveParser.parseArgument(args[0], data), WaveParser.parseArgument(args[1], data));
             }
 
             if (!conditionMet) {
