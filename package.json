@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "esbuild ./src/index.ts --bundle --minify --outfile=./dist/index.js && dets src/index.ts --name @wave-frontend/wave-js --files src/**/*.ts --out dist/index.d.ts",
-    "bundle": "node scripts/bundle.js"
+    "bundle": "node ./scripts/bundle.js"
   },
   "repository": {
     "type": "git",
