@@ -7,6 +7,7 @@ esbuild.build({
     bundle: true,
     platform: "browser",
     format: "cjs",
+    minifyWhitespace: true,
     plugins: [esbuildPluginTsc()]
 });
 
