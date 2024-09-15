@@ -17,7 +17,10 @@ export class WaveDom {
     }
 
     public getAllElements() {
-        return Array.from(this.parent.getElementsByTagName("*"));
+        const elements = Array.from(this.parent.getElementsByTagName("*"));
+        elements.push(this.parent);
+        
+        return elements;
     }
 
     public getElementsByAttribute(attribute: string, value?: string) {
