@@ -88,6 +88,7 @@ export class WaveApp {
         if (!this.dom)
             return;
 
+        const elements = this.dom.getAllElements();
         const data = this.getMergedStoreData();
         const keys = Object.keys(data);
 
@@ -95,7 +96,14 @@ export class WaveApp {
             const key = keys[i];
             const value = data[key];
 
-            this.dom.root.innerHTML = this.dom.root.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
+            for (let j = 0; j < elements.length; j++) {
+                const element = elements[j];
+
+                if (!element.innerHTML.includes(`{{ ${key} }}`))
+                    continue;
+
+                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
+            }
         }
     }
 
@@ -103,7 +111,8 @@ export class WaveApp {
     private initializeComponents() {
         if (!this.dom)
             return;
-        
+
+        const elements = this.dom.getAllElements();
         const components = this.getMergedStoreComponents();
         const keys = Object.keys(components);
 
@@ -111,7 +120,14 @@ export class WaveApp {
             const key = keys[i];
             const handler = components[key];
             
-            this.dom.root.innerHTML = this.dom.root.innerHTML.replaceAll(`{{ ${key} }}`, handler().outerHTML);
+            for (let j = 0; j < elements.length; j++) {
+                const element = elements[j];
+
+                if (!element.innerHTML.includes(`{{ ${key} }}`))
+                    continue;
+
+                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, handler().outerHTML);
+            }
         }
     }
 

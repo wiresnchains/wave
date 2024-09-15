@@ -15,6 +15,13 @@ export class WaveDom {
     public get root() {
         return this.parent;
     }
+    
+    public getAllElements() {
+        const elements = Array.from(this.parent.children);
+        elements.push(this.parent);
+        
+        return elements;
+    }
 
     public getElementsByAttribute(attribute: string, value?: string) {
         return Array.from(this.parent.querySelectorAll(`[${attribute}${value ? `=${value}` : ""}]`));
