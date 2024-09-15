@@ -79,15 +79,12 @@ export class WaveApp {
         if (!this.dom)
             return;
 
-        const elements = this.dom.getAllElements();
-
-        this.initializeData(elements);
-        this.initializeComponents(elements);
-
+        this.initializeComponents();
+        this.initializeData();
         this.updateConditionals();
     }
 
-    private initializeData(elements: Element[]) {
+    private initializeData() {
         if (!this.dom)
             return;
 
@@ -98,23 +95,14 @@ export class WaveApp {
             const key = keys[i];
             const value = data[key];
 
-            for (let j = 0; j < elements.length; j++) {
-                const element = elements[j];
-
-                if (!element.innerHTML.includes(`{{ ${key} }}`))
-                    continue;
-
-                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
-            }
+            this.dom.root.innerHTML = this.dom.root.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
         }
     }
 
     // TODO: Component parameters {{ component_call(params) }}
-    private initializeComponents(elements?: Element[]) {
+    private initializeComponents() {
         if (!this.dom)
             return;
-
-        elements = elements ? elements : this.dom.getAllElements();
         
         const components = this.getMergedStoreComponents();
         const keys = Object.keys(components);
@@ -123,20 +111,7 @@ export class WaveApp {
             const key = keys[i];
             const handler = components[key];
             
-            for (let j = 0; j < elements.length; j++) {
-                const element = elements[j];
-
-                if (!element.innerHTML.includes(`{{ ${key} }}`))
-                    continue;
-
-                const generatedComponent = handler();
-                const generatedComponentElements = Array.from(generatedComponent.children);
-                generatedComponentElements.push(generatedComponent);
-
-                this.initializeData(generatedComponentElements);
-
-                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, generatedComponent.outerHTML);
-            }
+            this.dom.root.innerHTML = this.dom.root.innerHTML.replaceAll(`{{ ${key} }}`, handler().outerHTML);
         }
     }
 
