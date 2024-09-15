@@ -1,20 +1,20 @@
-import { WaveDataType, WaveDictionary, WaveProxyHandler, WaveStoreGetResult } from "../@types/index";
+import { WaveDictionary, WaveProxyHandler, WaveStoreGetResult } from "../@types/index";
 
 type WaveDataChangeCallback = (instance: WaveStore, changedKey: string) => void;
 
 export class WaveStore {
     public dataChangeCallbacks: WaveDataChangeCallback[];
 
-    private data: WaveDictionary<WaveDataType>;
+    private data: WaveDictionary<any>;
     private proxies: WaveDictionary<WaveProxyHandler>;
 
-    constructor(from: { data?: WaveDictionary<WaveDataType>, proxies?: WaveDictionary<WaveProxyHandler> } = {}) {
+    constructor(from: { data?: WaveDictionary<any>, proxies?: WaveDictionary<WaveProxyHandler> } = {}) {
         this.data = from.data || {};
         this.proxies = from.proxies || {};
         this.dataChangeCallbacks = [];
     }
 
-    public async setValue(key: string, value: WaveDataType) {
+    public async setValue(key: string, value: any) {
         const proxy = this.proxies[key];
 
         if (proxy) {
@@ -40,10 +40,10 @@ export class WaveStore {
         if (value == undefined)
             return;
 
-        return { initialValue: value, getValue: () => this.getValue(key), update: async (_value: WaveDataType) => { return await this.set(key, _value) as WaveStoreGetResult } };
+        return { initialValue: value, getValue: () => this.getValue(key), update: async (_value: any) => { return await this.set(key, _value) as WaveStoreGetResult } };
     }
 
-    public async set(key: string, value: WaveDataType) {
+    public async set(key: string, value: any) {
         await this.setValue(key, value);
         return this.get(key);
     }

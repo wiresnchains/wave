@@ -3,11 +3,10 @@ export interface WaveDictionary<T> {
 }
 
 export interface WaveStoreGetResult {
-    initialValue: WaveDataType;
-    getValue: () => WaveDataType;
-    update: (value: WaveDataType) => Promise<WaveStoreGetResult>; 
+    initialValue: any;
+    getValue: () => any;
+    update: (value: any) => Promise<WaveStoreGetResult>; 
 }
 
-export type WaveDataType = string | number | boolean;
-export type WaveProxyHandler = (newValue: any) => Promise<boolean>;
+export type WaveProxyHandler = (newValue: any) => Promise<boolean> | boolean;
 export type WaveLogicalOperatorHandler = (data: any, compareWith: any) => boolean;
