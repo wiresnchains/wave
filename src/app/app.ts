@@ -21,6 +21,11 @@ export class WaveApp {
 
         this.stores.push(store);
     }
+    
+    public useStores(...stores: WaveStore[]) {
+        for (let i = 0; i < stores.length; i++)
+            this.useStore(stores[i]);
+    }
 
     public mount() {
         if (this.dom)
