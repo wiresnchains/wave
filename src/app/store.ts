@@ -1,4 +1,4 @@
-import { WaveDictionary, WaveProxyHandler, WaveStoreGetResult } from "../@types/index";
+import { WaveComponentHandler, WaveDictionary, WaveProxyHandler, WaveStoreGetResult } from "../@types/index";
 
 type WaveDataChangeCallback = (instance: WaveStore, changedKey: string) => void;
 
@@ -7,10 +7,12 @@ export class WaveStore {
 
     private data: WaveDictionary<any>;
     private proxies: WaveDictionary<WaveProxyHandler>;
+    private components: WaveDictionary<WaveComponentHandler>;
 
-    constructor(from: { data?: WaveDictionary<any>, proxies?: WaveDictionary<WaveProxyHandler> } = {}) {
+    constructor(from: { data?: WaveDictionary<any>, proxies?: WaveDictionary<WaveProxyHandler>, components?: WaveDictionary<WaveComponentHandler> } = {}) {
         this.data = from.data || {};
         this.proxies = from.proxies || {};
+        this.components = from.components || {};
         this.dataChangeCallbacks = [];
     }
 
@@ -56,8 +58,20 @@ export class WaveStore {
         delete this.proxies[key];
     }
 
+    public getComponentHandler(key: string) {
+        return this.components[key];
+    }
+
+    public setComponentHandler(key: string, handler: WaveComponentHandler) {
+        this.components[key] = handler;
+    }
+
     public getDataKeys() {
         return Object.keys(this.data);
+    }
+
+    public getComponentKeys() {
+        return Object.keys(this.components);
     }
 
     public addDataChangeCallback(callback: WaveDataChangeCallback) {

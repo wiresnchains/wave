@@ -1,4 +1,4 @@
-import { WaveDictionary } from "../@types/index";
+import { WaveComponentHandler, WaveDictionary } from "../@types/index";
 import { WaveAttributes } from "../constants/attributes";
 import { WaveMessages } from "../constants/messages";
 import { WaveDom } from "../core/dom";
@@ -80,6 +80,17 @@ export class WaveApp {
             return;
 
         const elements = this.dom.getAllElements();
+
+        this.initializeData(elements);
+        this.initializeComponents(elements);
+
+        this.updateConditionals();
+    }
+
+    private initializeData(elements: Element[]) {
+        if (!this.dom)
+            return;
+
         const data = this.getMergedStoreData();
         const keys = Object.keys(data);
 
@@ -96,8 +107,37 @@ export class WaveApp {
                 element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
             }
         }
+    }
 
-        this.updateConditionals();
+    // TODO: Component parameters {{ component_call(params) }}
+    private initializeComponents(elements?: Element[]) {
+        if (!this.dom)
+            return;
+
+        elements = elements ? elements : this.dom.getAllElements();
+        
+        const components = this.getMergedStoreComponents();
+        const keys = Object.keys(components);
+
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const handler = components[key];
+            
+            for (let j = 0; j < elements.length; j++) {
+                const element = elements[j];
+
+                if (!element.innerHTML.includes(`{{ ${key} }}`))
+                    continue;
+
+                const generatedComponent = handler();
+                const generatedComponentElements = Array.from(generatedComponent.children);
+                generatedComponentElements.push(generatedComponent);
+
+                this.initializeData(generatedComponentElements);
+
+                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, generatedComponent.outerHTML);
+            }
+        }
     }
 
     private onDataChange(instance: WaveStore, changedKey: string) {
@@ -133,6 +173,14 @@ export class WaveApp {
         }
     }
 
+    private updateComponents() {
+        if (!this.dom)
+            return;
+
+        const elements = this.dom.getElementsByAttribute(WaveAttributes.condition);
+        const components = this.getMergedStoreComponents();
+    }
+
     private getMergedStoreData() {
         const data: WaveDictionary<any> = {};
 
@@ -151,5 +199,25 @@ export class WaveApp {
         }
 
         return data;
+    }
+
+    private getMergedStoreComponents() {
+        const components: WaveDictionary<WaveComponentHandler> = {};
+
+        for (let i = 0; i < this.stores.length; i++) {
+            const store = this.stores[i];
+            const keys = store.getComponentKeys();
+
+            for (let j = 0; j < keys.length; j++) {
+                const key = keys[j];
+
+                if (components[key])
+                    console.warn(WaveMessages.storeKeyOverlap, key, this);
+
+                components[key] = store.getComponentHandler(key);
+            }
+        }
+
+        return components;
     }
 }

@@ -17,7 +17,7 @@ export class WaveDom {
     }
 
     public getAllElements() {
-        const elements = Array.from(this.parent.getElementsByTagName("*"));
+        const elements = Array.from(this.parent.children);
         elements.push(this.parent);
         
         return elements;
