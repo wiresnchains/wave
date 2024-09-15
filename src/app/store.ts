@@ -1,4 +1,4 @@
-import { WaveDataType, WaveDictionary, WaveProxyHandler } from "../@types/index";
+import { WaveDataType, WaveDictionary, WaveProxyHandler, WaveStoreGetResult } from "../@types/index";
 
 type WaveDataChangeCallback = (instance: WaveStore, changedKey: string) => void;
 
@@ -32,6 +32,20 @@ export class WaveStore {
 
     public getValue(key: string) {
         return this.data[key];
+    }
+
+    public get(key: string): WaveStoreGetResult | undefined {
+        const value = this.getValue(key);
+
+        if (value == undefined)
+            return;
+
+        return { initialValue: value, getValue: () => this.getValue(key), update: async (_value: WaveDataType) => { return await this.set(key, _value) as WaveStoreGetResult } };
+    }
+
+    public async set(key: string, value: WaveDataType) {
+        await this.setValue(key, value);
+        return this.get(key);
     }
 
     public setProxy(key: string, handler: WaveProxyHandler) {
