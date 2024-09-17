@@ -4,4 +4,5 @@ export namespace WaveMessages {
     export const storeKeyOverlap = "Overlapping store keys";
     export const alreadyMounted = "App is already mounted";
     export const notMounted = "App is not mounted";
+    export const invalidComponentParams = "Invalid component parameters";
 }

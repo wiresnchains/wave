@@ -86,96 +86,42 @@ export class WaveApp {
     private initializeStatements() {
         if (!this.dom)
             return;
-
-        let statements: { startIndex: number; endIndex: number; name: string; params: string }[] = [];
-
-        let startIndex = -1;
-        let inWaveStatement = false;
-        let inParams = false;
-        let statementName = "";
-        let params = "";
-
-        for (let i = 0; i < this.dom.root.innerHTML.length; i++) {
-            const char = this.dom.root.innerHTML[i];
-            const nextChar = this.dom.root.innerHTML[i + 1];
-
-            if (char == ' ')
-                continue;
+    
+        const regex = /\{\{(.*?)\}\}/g;
+        const content = this.dom.root.innerHTML;
+        const statements: { type: "data" | "component"; name: string; params: string[]; match: string }[] = [];
+    
+        let match;
+        while ((match = regex.exec(content)) !== null) {
+            const [fullMatch, innerContent] = match;
+            const trimmedContent = innerContent.trim();
             
-            if (char == "{" && nextChar == "{") {
-                inWaveStatement = true;
-                startIndex = i;
-                i++;
-                continue;
+            if (trimmedContent.includes('(')) {
+                const [name, paramsString] = trimmedContent.split(/\s*\(\s*/, 2);
+                const params = paramsString.slice(0, -1).match(/('[^']*'|"[^"]*"|[^,\s]+)/g) || [];
+                statements.push({ type: "component", name: name.trim(), params, match: fullMatch });
             }
-
-            if (char == "}" && nextChar == "}") {
-                inWaveStatement = false;
-                inParams = false;
-
-                statements.push({
-                    startIndex,
-                    endIndex: i + 2,
-                    name: statementName,
-                    params
-                });
-
-                statementName = "";
-                params = "";
-                i++;
-
-                continue;
-            }
-
-            if (char == "(" && inWaveStatement) {
-                inParams = true;
-                inWaveStatement = false;
-                continue;
-            }
-
-            if (char == ")" && inParams) {
-                inParams = false;
-                continue;
-            }
-
-            if (inWaveStatement)
-                statementName += char;
-
-            if (inParams)
-                params += char;
+            else
+                statements.push({ type: "data", name: trimmedContent, params: [], match: fullMatch });
         }
-
-        let newContent = this.dom.root.innerHTML;
-        let indexOffset = 0;
-        
+    
         const data = this.getMergedStoreData();
         const components = this.getMergedStoreComponents();
-
-        for (let i = 0; i < statements.length; i++) {
-            const statement = statements[i];
-
-            let type: string | undefined;
-
-            if (data[statement.name] != undefined)
-                type = "data";
-            else if (components[statement.name])
-                type = "component";
-
-            if (!type)
-                continue;
-
-            let content = "";
-
-            if (type == "data")
-                content = `<span wave-data="${statement.name}">${data[statement.name]}</span>`;
-            else if (type == "component")
-                content = components[statement.name](statement.params).outerHTML;
-
-            newContent = newContent.substring(0, statement.startIndex + indexOffset) + content + newContent.substring(statement.endIndex + indexOffset, newContent.length - 1 + indexOffset);
-
-            indexOffset += content.length - (statement.endIndex - statement.startIndex);
+    
+        let newContent = content;
+        for (const statement of statements) {
+            let replacementContent = "";
+            const parsedParams = statement.params.map(param => WaveParser.parseArgument(param.trim(), data));
+    
+            if (statement.type === "data") {
+                replacementContent = `<span wave-data="${statement.name}">${data[statement.name]}</span>`;
+            } else {
+                replacementContent = components[statement.name](...parsedParams).outerHTML;
+            }
+    
+            newContent = newContent.replace(statement.match, replacementContent);
         }
-
+    
         this.dom.root.innerHTML = newContent;
     }
 
