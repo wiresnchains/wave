@@ -79,56 +79,104 @@ export class WaveApp {
         if (!this.dom)
             return;
 
-        this.initializeComponents();
-        this.initializeData();
+        this.initializeStatements();
         this.updateConditionals();
     }
 
-    private initializeData() {
+    private initializeStatements() {
         if (!this.dom)
             return;
 
-        const elements = this.dom.getAllElements();
-        const data = this.getMergedStoreData();
-        const keys = Object.keys(data);
+        let statements: { startIndex: number; endIndex: number; name: string; params: string }[] = [];
 
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            const value = data[key];
+        let startIndex = -1;
+        let inWaveStatement = false;
+        let inParams = false;
+        let statementName = "";
+        let params = "";
 
-            for (let j = 0; j < elements.length; j++) {
-                const element = elements[j];
+        for (let i = 0; i < this.dom.root.innerHTML.length; i++) {
+            const char = this.dom.root.innerHTML[i];
+            const nextChar = this.dom.root.innerHTML[i + 1];
 
-                if (!element.innerHTML.includes(`{{ ${key} }}`))
-                    continue;
-
-                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, `<span ${WaveAttributes.data}="${key}">${value}</span>`);
-            }
-        }
-    }
-
-    // TODO: Component parameters {{ component_call(params) }}
-    private initializeComponents() {
-        if (!this.dom)
-            return;
-
-        const elements = this.dom.getAllElements();
-        const components = this.getMergedStoreComponents();
-        const keys = Object.keys(components);
-
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            const handler = components[key];
+            if (char == ' ')
+                continue;
             
-            for (let j = 0; j < elements.length; j++) {
-                const element = elements[j];
-
-                if (!element.innerHTML.includes(`{{ ${key} }}`))
-                    continue;
-
-                element.innerHTML = element.innerHTML.replaceAll(`{{ ${key} }}`, handler().outerHTML);
+            if (char == "{" && nextChar == "{") {
+                inWaveStatement = true;
+                startIndex = i;
+                i++;
+                continue;
             }
+
+            if (char == "}" && nextChar == "}") {
+                inWaveStatement = false;
+                inParams = false;
+
+                statements.push({
+                    startIndex,
+                    endIndex: i + 2,
+                    name: statementName,
+                    params
+                });
+
+                statementName = "";
+                params = "";
+                i++;
+
+                continue;
+            }
+
+            if (char == "(" && inWaveStatement) {
+                inParams = true;
+                inWaveStatement = false;
+                continue;
+            }
+
+            if (char == ")" && inParams) {
+                inParams = false;
+                continue;
+            }
+
+            if (inWaveStatement)
+                statementName += char;
+
+            if (inParams)
+                params += char;
         }
+
+        let newContent = this.dom.root.innerHTML;
+        let indexOffset = 0;
+        
+        const data = this.getMergedStoreData();
+        const components = this.getMergedStoreComponents();
+
+        for (let i = 0; i < statements.length; i++) {
+            const statement = statements[i];
+
+            let type: string | undefined;
+
+            if (data[statement.name] != undefined)
+                type = "data";
+            else if (components[statement.name])
+                type = "component";
+
+            if (!type)
+                continue;
+
+            let content = "";
+
+            if (type == "data")
+                content = `<span wave-data="${statement.name}">${data[statement.name]}</span>`;
+            else if (type == "component")
+                content = components[statement.name](statement.params).outerHTML;
+
+            newContent = newContent.substring(0, statement.startIndex + indexOffset) + content + newContent.substring(statement.endIndex + indexOffset, newContent.length - 1 + indexOffset);
+
+            indexOffset += content.length - (statement.endIndex - statement.startIndex);
+        }
+
+        this.dom.root.innerHTML = newContent;
     }
 
     private onDataChange(instance: WaveStore, changedKey: string) {
@@ -162,14 +210,6 @@ export class WaveApp {
 
             element.style.display = conditionsMet ? "" : "none";
         }
-    }
-
-    private updateComponents() {
-        if (!this.dom)
-            return;
-
-        const elements = this.dom.getElementsByAttribute(WaveAttributes.condition);
-        const components = this.getMergedStoreComponents();
     }
 
     private getMergedStoreData() {
