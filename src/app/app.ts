@@ -83,20 +83,20 @@ export class WaveApp {
         this.updateConditionals();
     }
 
-    private initializeStatements() {
+    private async initializeStatements() {
         if (!this.dom)
             return;
+
+        const mount = this.dom.root;
     
         const regex = /\{\{(.*?)\}\}/g;
-        const content = this.dom.root.innerHTML;
         const statements: { type: "data" | "component"; name: string; params: string[]; match: string }[] = [];
     
-        let match;
-        while ((match = regex.exec(content)) !== null) {
+        for (let match; (match = regex.exec(mount.innerHTML)) != null;) {
             const [fullMatch, innerContent] = match;
             const trimmedContent = innerContent.trim();
             
-            if (trimmedContent.includes('(')) {
+            if (trimmedContent.includes("(")) {
                 const [name, paramsString] = trimmedContent.split(/\s*\(\s*/, 2);
                 const params = paramsString.slice(0, -1).match(/('[^']*'|"[^"]*"|[^,\s]+)/g) || [];
                 statements.push({ type: "component", name: name.trim(), params, match: fullMatch });
@@ -107,22 +107,51 @@ export class WaveApp {
     
         const data = this.getMergedStoreData();
         const components = this.getMergedStoreComponents();
-    
-        let newContent = content;
-        for (const statement of statements) {
-            let replacementContent = "";
-            const parsedParams = statement.params.map(param => WaveParser.parseArgument(param.trim(), data));
-    
-            if (statement.type === "data") {
-                replacementContent = `<span wave-data="${statement.name}">${data[statement.name]}</span>`;
-            } else {
-                replacementContent = components[statement.name](...parsedParams).outerHTML;
+
+        const componentPromises: Promise<void>[] = [];
+
+        for (let i = 0; i < statements.length; i++) {
+            const statement = statements[i];
+
+            const parsedParams: any[] = [];
+
+            for (let j = 0; j < statement.params.length; j++) {
+                const param = statement.params[j];
+                parsedParams.push(WaveParser.parseArgument(param.trim(), data));
             }
     
-            newContent = newContent.replace(statement.match, replacementContent);
+            switch (statement.type) {
+                case "data":
+                    this.dom.replace(statement.match, `<span wave-data="${statement.name}">${data[statement.name]}</span>`);
+                    break;
+                case "component":
+                    const uniqueId = `wave-component-${statement.name}-${i}`;
+                    const tempReplacement = `<span id="${uniqueId}" style="display: none;">${statement.match}</span>`;
+                    
+                    this.dom.replace(statement.match, tempReplacement);
+
+                    const componentPromise = new Promise<void>(async (resolve, reject) => {
+                        if (!this.dom)
+                            return reject(WaveMessages.notMounted);
+
+                        const component = components[statement.name];
+                        const content = (await component(...parsedParams)).outerHTML;
+
+                        const tempElement = this.dom.root.querySelector(`#${uniqueId}`);
+                        if (tempElement) {
+                            tempElement.outerHTML = content;
+                        }
+
+                        resolve();
+                    });
+
+                    componentPromises.push(componentPromise);
+
+                    break;
+            }
         }
-    
-        this.dom.root.innerHTML = newContent;
+
+        await Promise.all(componentPromises);
     }
 
     private onDataChange(instance: WaveStore, changedKey: string) {

@@ -26,4 +26,8 @@ export class WaveDom {
     public getElementsByAttribute(attribute: string, value?: string) {
         return Array.from(this.parent.querySelectorAll(`[${attribute}${value ? `=${value}` : ""}]`));
     }
+
+    public replace(match: string, replacement: string) {
+        this.parent.innerHTML = this.parent.innerHTML.replace(match, replacement);
+    }
 }
