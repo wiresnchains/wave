@@ -1,5 +1,6 @@
 const esbuild = require("esbuild");
 const esbuildPluginTsc = require("esbuild-plugin-tsc");
+const fs = require("fs");
 
 esbuild.build({
     entryPoints: ["./src/bundle.ts"],
@@ -10,5 +11,7 @@ esbuild.build({
     minifyWhitespace: true,
     plugins: [esbuildPluginTsc()]
 });
+
+fs.copyFileSync("./src/benchmark.js", "./dist/benchmark.js");
 
 // Remember that if we change what we build, we should also update .npmignore
