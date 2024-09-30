@@ -43,15 +43,33 @@ export class WaveApp {
         if (!this.dom)
             throw new Error(WaveMessages.notMounted);
 
-        const data = this.getMergedStoreData();
-        const keys = Object.keys(data);
+        const mergedStore = this.getMergedStore();
+        const dataKeys = Object.keys(mergedStore.data);
+        const componentKeys = Object.keys(mergedStore.components);
 
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
+        for (let i = 0; i < dataKeys.length; i++) {
+            const key = dataKeys[i];
             const elements = this.dom.getElementsByAttribute(WaveAttributes.data, key);
 
             for (let j = 0; j < elements.length; j++)
                 elements[j].outerHTML = `{{ ${key} }}`;
+        }
+
+        for (let i = 0; i < componentKeys.length; i++) {
+            const key = componentKeys[i];
+            const elements = this.dom.getElementsByAttribute(WaveAttributes.component, key);
+
+            for (let j = 0; j < elements.length; j++) {
+                const element = elements[j];
+                const cache = element.getAttribute(WaveAttributes.componentCache);
+
+                if (!cache) {
+                    element.outerHTML = `{{ ${key} }}`;
+                    continue;
+                }
+
+                element.outerHTML = cache;
+            }
         }
 
         const conditionElements = this.dom.getElementsByAttribute(WaveAttributes.condition);
@@ -105,8 +123,7 @@ export class WaveApp {
                 statements.push({ type: "data", name: trimmedContent, params: [], match: fullMatch });
         }
     
-        const data = this.getMergedStoreData();
-        const components = this.getMergedStoreComponents();
+        const mergedStore = this.getMergedStore();
 
         const componentPromises: Promise<void>[] = [];
 
@@ -117,15 +134,15 @@ export class WaveApp {
 
             for (let j = 0; j < statement.params.length; j++) {
                 const param = statement.params[j];
-                parsedParams.push(WaveParser.parseArgument(param.trim(), data));
+                parsedParams.push(WaveParser.parseArgument(param.trim(), mergedStore.data));
             }
     
             switch (statement.type) {
                 case "data":
-                    this.dom.replace(statement.match, `<span wave-data="${statement.name}">${data[statement.name]}</span>`);
+                    this.dom.replace(statement.match, `<span wave-data="${statement.name}">${mergedStore.data[statement.name]}</span>`);
                     break;
                 case "component":
-                    const uniqueId = `wave-component-${statement.name}-${i}`;
+                    const uniqueId = `${WaveAttributes.component}-${statement.name}-${i}`;
                     const tempReplacement = `<span id="${uniqueId}" style="display: none;">${statement.match}</span>`;
                     
                     this.dom.replace(statement.match, tempReplacement);
@@ -134,13 +151,13 @@ export class WaveApp {
                         if (!this.dom)
                             return reject(WaveMessages.notMounted);
 
-                        const component = components[statement.name];
+                        const component = mergedStore.components[statement.name];
                         const content = (await component(...parsedParams)).outerHTML;
 
-                        const tempElement = this.dom.root.querySelector(`#${uniqueId}`);
-                        if (tempElement) {
-                            tempElement.outerHTML = content;
-                        }
+                        const tempElement = this.dom.root.querySelector("#" + uniqueId);
+
+                        if (tempElement)
+                            tempElement.outerHTML = `<div ${WaveAttributes.component}="${statement.name}" ${WaveAttributes.componentCache}="${statement.match.replaceAll("\"", "'")}">${content}</div>`;
 
                         resolve();
                     });
@@ -172,7 +189,7 @@ export class WaveApp {
             return;
 
         const elements = this.dom.getElementsByAttribute(WaveAttributes.condition);
-        const data = this.getMergedStoreData();
+        const mergedStore = this.getMergedStore();
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i] as HTMLElement;
@@ -181,41 +198,32 @@ export class WaveApp {
             if (!attribute)
                 continue;
 
-            const conditionsMet = WaveParser.parseCondition(attribute, data);
+            const conditionsMet = WaveParser.parseCondition(attribute, mergedStore.data);
 
             element.style.display = conditionsMet ? "" : "none";
         }
     }
 
-    private getMergedStoreData() {
+    private getMergedStore() {
         const data: WaveDictionary<any> = {};
+        const components: WaveDictionary<WaveComponentHandler> = {};
 
         for (let i = 0; i < this.stores.length; i++) {
             const store = this.stores[i];
-            const keys = store.getDataKeys();
+            const dataKeys = store.getDataKeys();
+            const componentKeys = store.getComponentKeys();
 
-            for (let j = 0; j < keys.length; j++) {
-                const key = keys[j];
+            for (let j = 0; j < dataKeys.length; j++) {
+                const key = dataKeys[j];
 
                 if (data[key])
                     console.warn(WaveMessages.storeKeyOverlap, key, this);
 
                 data[key] = store.getValue(key);
             }
-        }
 
-        return data;
-    }
-
-    private getMergedStoreComponents() {
-        const components: WaveDictionary<WaveComponentHandler> = {};
-
-        for (let i = 0; i < this.stores.length; i++) {
-            const store = this.stores[i];
-            const keys = store.getComponentKeys();
-
-            for (let j = 0; j < keys.length; j++) {
-                const key = keys[j];
+            for (let j = 0; j < componentKeys.length; j++) {
+                const key = componentKeys[j];
 
                 if (components[key])
                     console.warn(WaveMessages.storeKeyOverlap, key, this);
@@ -224,6 +232,6 @@ export class WaveApp {
             }
         }
 
-        return components;
+        return { data, components };
     }
 }
