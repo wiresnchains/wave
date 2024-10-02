@@ -1,4 +1,5 @@
-import { WaveComponentHandler, WaveDictionary, WaveStatement, WaveStatementType } from "../@types/index";
+import { WaveStatementType } from "../core/enums";
+import { WaveComponentHandler, WaveDictionary, WaveStatement } from "../@types/index";
 import { WaveAttributes } from "../constants/attributes";
 import { WaveMessages } from "../constants/messages";
 import { WaveDom } from "../core/dom";
