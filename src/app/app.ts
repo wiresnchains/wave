@@ -1,4 +1,4 @@
-import { WaveComponentHandler, WaveDictionary } from "../@types/index";
+import { WaveComponentHandler, WaveDictionary, WaveStatement, WaveStatementType } from "../@types/index";
 import { WaveAttributes } from "../constants/attributes";
 import { WaveMessages } from "../constants/messages";
 import { WaveDom } from "../core/dom";
@@ -108,7 +108,7 @@ export class WaveApp {
         const mount = this.dom.root;
     
         const regex = /\{\{(.*?)\}\}/g;
-        const statements: { type: "data" | "component"; name: string; params: string[]; match: string }[] = [];
+        const statements: WaveStatement[] = [];
     
         for (let match; (match = regex.exec(mount.innerHTML)) != null;) {
             const [fullMatch, innerContent] = match;
@@ -117,10 +117,10 @@ export class WaveApp {
             if (trimmedContent.includes("(")) {
                 const [name, paramsString] = trimmedContent.split(/\s*\(\s*/, 2);
                 const params = paramsString.slice(0, -1).match(/('[^']*'|"[^"]*"|[^,\s]+)/g) || [];
-                statements.push({ type: "component", name: name.trim(), params, match: fullMatch });
+                statements.push({ type: WaveStatementType.Component, name: name.trim(), params, match: fullMatch });
             }
             else
-                statements.push({ type: "data", name: trimmedContent, params: [], match: fullMatch });
+                statements.push({ type: WaveStatementType.Data, name: trimmedContent, params: [], match: fullMatch });
         }
     
         const mergedStore = this.getMergedStore();
@@ -138,10 +138,10 @@ export class WaveApp {
             }
     
             switch (statement.type) {
-                case "data":
+                case WaveStatementType.Data:
                     this.dom.replace(statement.match, `<span wave-data="${statement.name}">${mergedStore.data[statement.name]}</span>`);
                     break;
-                case "component":
+                case WaveStatementType.Component:
                     const uniqueId = `${WaveAttributes.component}-${statement.name}-${i}`;
                     const tempReplacement = `<span id="${uniqueId}" style="display: none;">${statement.match}</span>`;
                     
