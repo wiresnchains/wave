@@ -36,8 +36,7 @@ time(`Benchmark`, () => {
         for (let i = 0; i < TARGET_APPS; i++) {
             const app = new WaveApp("#app-" + i);
     
-            for (let j = 0; j < stores.length; j++)
-                app.useStore(stores[j]);
+            app.useStores(...stores);
     
             apps.push(app);
         }
